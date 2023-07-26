@@ -1,20 +1,37 @@
-import { hiraganaToAlphabet, hiraganas } from "@/lib/utils/mappings";
-import { useState, useEffect } from "react";
+import {
+  hiraganas,
+  katakanas,
+  allKanas,
+  allKanasToAlphabet,
+} from "@/lib/utils/mappings";
+import { useState, useEffect, useCallback } from "react";
 import _ from "lodash";
 import { Popover } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { Modal, Radio } from "@mantine/core";
 
 export default function IndexPage() {
   const [characters, setCharacters] = useState<string[]>([]);
   const [answer, setAnswer] = useState<string>("");
+  const [trainingMode, setTrainingMode] = useState<string>("hiragana");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const resetCharacters = () => {
-    setCharacters(_.sampleSize(hiraganas, 3));
-  };
+  const resetCharacters = useCallback(() => {
+    if (trainingMode === "hiragana") {
+      setCharacters(_.sampleSize(hiraganas, 3));
+    } else if (trainingMode === "katakana") {
+      setCharacters(_.sampleSize(katakanas, 3));
+    } else {
+      setCharacters(_.sampleSize(allKanas, 3));
+    }
+  }, [trainingMode]);
 
   useEffect(() => {
-    resetCharacters();
-  }, []);
+    if (!isModalOpen) {
+      resetCharacters();
+      setAnswer("");
+    }
+  }, [isModalOpen, resetCharacters]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,7 +42,13 @@ export default function IndexPage() {
         <p className="font-open text-text text-[1rem] md:text-[1.25rem]">
           Learn hiragana and katakana!
         </p>
-        <div className="flex flex-row justify-center mt-[2rem]">
+        <button
+          className="w-full bg-secondary text-text font-open font-bold text-[1rem] md:text-[1.25rem] p-[1rem] mt-[0.5rem] transition-all hover:scale-105"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Change settings
+        </button>
+        <div className="flex flex-row justify-center mt-[4rem]">
           {characters.map((char, idx) => {
             return (
               <Popover key={`${char}${idx}`}>
@@ -36,7 +59,7 @@ export default function IndexPage() {
                 </Popover.Target>
                 <Popover.Dropdown>
                   <p className="font-open text-text text-[1rem] md:text-[1.25rem]">
-                    {hiraganaToAlphabet[char]}
+                    {allKanasToAlphabet[char]}
                   </p>
                 </Popover.Dropdown>
               </Popover>
@@ -56,7 +79,7 @@ export default function IndexPage() {
 
             if (
               answer.toLowerCase() !==
-              characters.map((char) => hiraganaToAlphabet[char]).join("")
+              characters.map((char) => allKanasToAlphabet[char]).join("")
             ) {
               notifications.show({
                 withCloseButton: false,
@@ -93,6 +116,30 @@ export default function IndexPage() {
             </button>
           </div>
         </form>
+        <Modal
+          opened={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          centered
+          withCloseButton={false}
+        >
+          <div className="p-[1rem]">
+            <h1 className="text-playfair font-bold text-white text-[1.5rem]">
+              Settings
+            </h1>
+            <p className="text-open text-[1rem[ text-white mt-[1rem]">
+              Select training mode
+            </p>
+            <Radio.Group
+              className="flex flex-col mt-[0.5rem] items-start gap-[0.5rem]"
+              value={trainingMode}
+              onChange={(v) => setTrainingMode(v)}
+            >
+              <Radio value="hiragana" label="Hiragana" />
+              <Radio value="katakana" label="Katakana" />
+              <Radio value="hiragana-katakana" label="Hiragana and Katakana" />
+            </Radio.Group>
+          </div>
+        </Modal>
       </div>
     </div>
   );
