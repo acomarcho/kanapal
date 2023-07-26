@@ -1,4 +1,4 @@
-export const hiraganaToAlphabet = {
+export const hiraganaToAlphabet: { [key: string]: string } = {
   あ: "a",
   い: "i",
   う: "u",
