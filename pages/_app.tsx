@@ -7,11 +7,11 @@ import Head from "next/head";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 
-const playfairDisplay = Playfair_Display({
+export const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
 });
-const openSans = Open_Sans({
+export const openSans = Open_Sans({
   subsets: ["latin"],
   variable: "--font-open",
 });

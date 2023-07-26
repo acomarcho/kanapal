@@ -9,6 +9,7 @@ import _ from "lodash";
 import { Popover } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { Modal, Radio } from "@mantine/core";
+import { playfairDisplay, openSans } from "./_app";
 
 export default function IndexPage() {
   const [characters, setCharacters] = useState<string[]>([]);
@@ -122,11 +123,15 @@ export default function IndexPage() {
           centered
           withCloseButton={false}
         >
-          <div className="p-[1rem]">
-            <h1 className="text-playfair font-bold text-white text-[1.5rem]">
+          <div className={`p-[1rem]`}>
+            <h1
+              className={`${playfairDisplay.variable} font-playfair font-bold text-white text-[1.5rem]`}
+            >
               Settings
             </h1>
-            <p className="text-open text-[1rem[ text-white mt-[1rem]">
+            <p
+              className={`${openSans.variable} font-open text-[1rem[ text-white mt-[1rem]`}
+            >
               Select training mode
             </p>
             <Radio.Group
