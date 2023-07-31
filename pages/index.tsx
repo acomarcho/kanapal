@@ -102,7 +102,7 @@ export default function IndexPage() {
           <div>
             <input
               type="text"
-              className="w-full bg-white p-[1rem] text-[1rem] md:text-[1.25rem] font-open text-background"
+              className="w-full bg-white p-[1rem] text-[1rem] md:text-[1.25rem] font-open leading-normal text-background"
               placeholder="Type the romanization here!"
               value={answer}
               onChange={(e) => setAnswer(e.currentTarget.value)}
