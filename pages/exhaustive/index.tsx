@@ -9,24 +9,29 @@ import _ from "lodash";
 import { Popover } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { Modal, Radio } from "@mantine/core";
-import { playfairDisplay, openSans } from "./_app";
+import { playfairDisplay, openSans } from "../_app";
 import Link from "next/link";
 
 export default function IndexPage() {
   const [characters, setCharacters] = useState<string[]>([]);
+  const [randomChar, setRandomChar] = useState<string>("");
   const [answer, setAnswer] = useState<string>("");
   const [trainingMode, setTrainingMode] = useState<string>("hiragana");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const resetCharacters = useCallback(() => {
     if (trainingMode === "hiragana") {
-      setCharacters(_.sampleSize(hiraganas, 3));
+      setCharacters([...hiraganas]);
     } else if (trainingMode === "katakana") {
-      setCharacters(_.sampleSize(katakanas, 3));
+      setCharacters([...katakanas]);
     } else {
-      setCharacters(_.sampleSize(allKanas, 3));
+      setCharacters([...allKanas]);
     }
   }, [trainingMode]);
+
+  const removeCharacter = (char: string) => {
+    setCharacters(characters.filter((ch) => ch !== char));
+  };
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -34,6 +39,14 @@ export default function IndexPage() {
       setAnswer("");
     }
   }, [isModalOpen, resetCharacters]);
+
+  useEffect(() => {
+    if (characters.length > 0) {
+      setRandomChar(_.sample(characters)!);
+    } else {
+      setRandomChar("");
+    }
+  }, [characters, resetCharacters]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,25 +64,24 @@ export default function IndexPage() {
           Change settings
         </button>
         <div className="flex flex-row justify-center mt-[4rem]">
-          {characters.map((char, idx) => {
-            return (
-              <Popover key={`${char}${idx}`}>
-                <Popover.Target>
-                  <button className="p-[1rem] border-2 border-border font-open font-bold text-text text-[1.75rem] md:text-[2.5rem]">
-                    {char}
-                  </button>
-                </Popover.Target>
-                <Popover.Dropdown>
-                  <p className="font-open text-text text-[1rem] md:text-[1.25rem]">
-                    {allKanasToAlphabet[char]}
-                  </p>
-                </Popover.Dropdown>
-              </Popover>
-            );
-          })}
+          <Popover>
+            <Popover.Target>
+              <button className="p-[1rem] border-2 border-border font-open font-bold text-text text-[1.75rem] md:text-[2.5rem]">
+                {randomChar}
+              </button>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <p className="font-open text-text text-[1rem] md:text-[1.25rem]">
+                {allKanasToAlphabet[randomChar]}
+              </p>
+            </Popover.Dropdown>
+          </Popover>
         </div>
         <p className="font-open text-text text-[1rem] md:text-[1.5rem] italic text-center mt-[0.5rem]">
           Click on the character to see the romanization!
+        </p>
+        <p className="font-open text-text text-[0.75rem] md:text-[1rem] text-center mt-[0.5rem]">
+          You have {characters.length} characters left to solve.
         </p>
         <form
           onSubmit={(e) => {
@@ -79,10 +91,7 @@ export default function IndexPage() {
               return;
             }
 
-            if (
-              answer.toLowerCase() !==
-              characters.map((char) => allKanasToAlphabet[char]).join("")
-            ) {
+            if (answer.toLowerCase() !== allKanasToAlphabet[randomChar]) {
               notifications.show({
                 withCloseButton: false,
                 color: "red",
@@ -95,7 +104,16 @@ export default function IndexPage() {
                 message: "Correct answer!",
               });
               setAnswer("");
-              resetCharacters();
+              removeCharacter(randomChar);
+
+              if (characters.length === 1) {
+                notifications.show({
+                  withCloseButton: false,
+                  color: "teal",
+                  message: "Congratulations! You finished all the characters!",
+                });
+                resetCharacters();
+              }
             }
           }}
           className="mt-[2rem]"
@@ -148,10 +166,10 @@ export default function IndexPage() {
         </Modal>
         <div className="text-center">
           <Link
-            href="/exhaustive"
+            href="/"
             className="inline-block font-open text-white text-[1rem] mt-[1rem] underline"
           >
-            I want to learn exhaustively by learning characters one by one!
+            I want to learn by typing words!
           </Link>
         </div>
       </div>
